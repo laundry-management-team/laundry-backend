@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+model User {
+  id           String   @id @default(uuid())
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(CUSTOMER)
+  branchId     String?  @map("branch_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  addresses        Address[]
+  deviceTokens     DeviceToken[]
+  ordersAsCustomer Order[]            @relation("CustomerOrders")
+  ordersAsStaff    Order[]            @relation("StaffOrders")
+  ordersMarkedPaid Order[]            @relation("OrderMarkedPaidBy")
+  statusEventsMade OrderStatusEvent[]
+
+  @@map("users")
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  line1     String
+  lat       Decimal? @db.Decimal(9, 6)
+  lng       Decimal? @db.Decimal(9, 6)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model DeviceToken {
+  id        String         @id @default(uuid())
+  userId    String         @map("user_id")
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String         @unique
+  platform  DevicePlatform
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+enum OrderStatus {
+  WAITING_FOR_STAFF
+  ORDER_ACCEPTED
+  PROCESSING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceUnit {
+  PER_KG
+  PER_ITEM
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  staff    User[]
+  services Service[]
+  orders   Order[]
+
+  @@map("branches")
+}
+
+model Service {
+  id         String      @id @default(uuid())
+  branchId   String      @map("branch_id")
+  branch     Branch      @relation(fields: [branchId], references: [id])
+  name       String
+  unit       ServiceUnit
+  price      Decimal     @db.Decimal(10, 2)
+  estMinutes Int         @map("est_minutes")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  orderItems OrderItem[]
+
+  @@index([branchId])
+  @@map("services")
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     String        @unique @map("order_number")
+  customerId      String        @map("customer_id")
+  customer        User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  branchId        String        @map("branch_id")
+  branch          Branch        @relation(fields: [branchId], references: [id])
+  assignedStaffId String?       @map("assigned_staff_id")
+  assignedStaff   User?         @relation("StaffOrders", fields: [assignedStaffId], references: [id])
+  status          OrderStatus   @default(WAITING_FOR_STAFF)
+  itemCount       Int           @default(0) @map("item_count")
+  note            String?
+  totalAmount     Decimal       @default(0) @map("total_amount") @db.Decimal(10, 2)
+  paymentStatus   PaymentStatus @default(UNPAID) @map("payment_status")
+  markedPaidById  String?       @map("marked_paid_by_id")
+  markedPaidBy    User?         @relation("OrderMarkedPaidBy", fields: [markedPaidById], references: [id])
+  paidAt          DateTime?     @map("paid_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  items        OrderItem[]
+  statusEvents OrderStatusEvent[]
+
+  @@index([branchId, status, createdAt])
+  @@index([customerId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String  @id @default(uuid())
+  orderId          String  @map("order_id")
+  order            Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  serviceId        String  @map("service_id")
+  service          Service @relation(fields: [serviceId], references: [id])
+  quantityOrWeight Decimal @map("quantity_or_weight") @db.Decimal(10, 2)
+  subtotal         Decimal @db.Decimal(10, 2)
+
+  @@map("order_items")
+}
+
+model OrderStatusEvent {
+  id          String      @id @default(uuid())
+  orderId     String      @map("order_id")
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      OrderStatus
+  changedById String      @map("changed_by_id")
+  changedBy   User        @relation(fields: [changedById], references: [id])
+  note        String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  @@index([orderId, createdAt])
+  @@map("order_status_events")
+}
+
+model OrderNumberCounter {
+  id      Int    @id @default(1)
+  current BigInt @default(0)
+
+  @@map("order_number_counters")
+}

@@ -1,0 +1,5 @@
+{
+  "prisma.pinToPrisma6": false,
+  "markdown-pdf.displayHeaderFooter": false,
+  "js/ts.preferences.importModuleSpecifier": "relative"
+}

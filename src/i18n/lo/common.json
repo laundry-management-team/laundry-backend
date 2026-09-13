@@ -1,0 +1,11 @@
+{
+  "SUCCESS": "ສຳເລັດ",
+  "VALIDATION_ERROR": "ກວດສອບຂໍ້ມູນລົ້ມເຫຼວ",
+  "UNAUTHORIZED": "ບໍ່ໄດ້ຮັບອະນຸຍາດ",
+  "FORBIDDEN": "ຫ້າມເຂົ້າເຖິງ",
+  "NOT_FOUND": "ບໍ່ພົບຂໍ້ມູນ",
+  "CONFLICT": "ຂໍ້ມູນຂັດແຍ້ງ",
+  "TOO_MANY_REQUESTS": "ຮ້ອງຂໍຫຼາຍເກີນໄປ",
+  "BAD_REQUEST": "ຄຳຮ້ອງຂໍບໍ່ຖືກຕ້ອງ",
+  "INTERNAL_ERROR": "ຂໍ້ຜິດພາດພາຍໃນເຊີບເວີ"
+}
