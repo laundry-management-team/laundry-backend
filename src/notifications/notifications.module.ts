@@ -5,6 +5,7 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { NotificationsProcessor } from './notifications-processor';
 import { FirebaseModule } from '../firebase/firebase.module';
+import { NotificationsController } from './notifications.controller';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { FirebaseModule } from '../firebase/firebase.module';
       adapter: BullMQAdapter,
     }),
   ],
+  controllers: [NotificationsController],
   providers: [NotificationsService, NotificationsProcessor],
   exports: [NotificationsService],
 })

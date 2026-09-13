@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
+import { CreateServiceDto } from './dto/create-service.dto';
 
 const CACHE_TTL_SECONDS = 600;
 
@@ -48,5 +49,13 @@ export class ServicesService {
 
   async invalidateBranchCache(branchId: string) {
     await this.redis.del(`branch:${branchId}:services`);
+  }
+
+  async create(branchId: string, dto: CreateServiceDto) {
+    const service = await this.prisma.service.create({
+      data: { ...dto, branchId },
+    });
+    await this.invalidateBranchCache(branchId);
+    return service;
   }
 }

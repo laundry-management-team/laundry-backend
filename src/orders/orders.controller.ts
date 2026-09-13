@@ -16,12 +16,13 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { Role } from '../../generated/prisma/client';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
 import { seconds, Throttle } from '@nestjs/throttler';
 import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
 
 @ApiTags('Orders')
+@ApiBearerAuth()
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {

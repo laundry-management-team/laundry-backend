@@ -62,8 +62,8 @@ export class OrdersService {
 
     const orderNumber = await this.orderNumbers.next();
 
-    return this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.create({
+    const order = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
         data: {
           orderNumber,
           customerId,
@@ -78,14 +78,22 @@ export class OrdersService {
 
       await tx.orderStatusEvent.create({
         data: {
-          orderId: order.id,
+          orderId: created.id,
           status: OrderStatus.WAITING_FOR_STAFF,
           changedById: actingUser.userId,
         },
       });
 
-      return order;
+      return created;
     });
+
+    await this.notifications.notifyNewOrder({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      branchId: order.branchId,
+    });
+
+    return order;
   }
 
   async findAll(actingUser: AuthenticatedUser) {
