@@ -4,9 +4,11 @@ import { BullModule } from '@nestjs/bullmq';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { NotificationsProcessor } from './notifications-processor';
+import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
   imports: [
+    FirebaseModule,
     BullModule.registerQueue({
       name: 'notifications',
       defaultJobOptions: {
