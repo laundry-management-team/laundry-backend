@@ -23,7 +23,9 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Laundry service backend — a [NestJS](https://github.com/nestjs/nest) API using PostgreSQL (Prisma), Redis (BullMQ + caching + rate limiting), and Sentry.
+
+> **New to this repo?** See [docs/GETTING-STARTED.md](./docs/GETTING-STARTED.md) for full setup instructions (env vars, database, running, testing).
 
 ## Project setup
 
