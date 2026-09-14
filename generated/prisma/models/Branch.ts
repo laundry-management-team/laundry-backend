@@ -27,18 +27,27 @@ export type AggregateBranch = {
 export type BranchMinAggregateOutputType = {
   id: string | null
   name: string | null
+  address: string | null
+  phone: string | null
+  isActive: boolean | null
   createdAt: Date | null
 }
 
 export type BranchMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  address: string | null
+  phone: string | null
+  isActive: boolean | null
   createdAt: Date | null
 }
 
 export type BranchCountAggregateOutputType = {
   id: number
   name: number
+  address: number
+  phone: number
+  isActive: number
   createdAt: number
   _all: number
 }
@@ -47,18 +56,27 @@ export type BranchCountAggregateOutputType = {
 export type BranchMinAggregateInputType = {
   id?: true
   name?: true
+  address?: true
+  phone?: true
+  isActive?: true
   createdAt?: true
 }
 
 export type BranchMaxAggregateInputType = {
   id?: true
   name?: true
+  address?: true
+  phone?: true
+  isActive?: true
   createdAt?: true
 }
 
 export type BranchCountAggregateInputType = {
   id?: true
   name?: true
+  address?: true
+  phone?: true
+  isActive?: true
   createdAt?: true
   _all?: true
 }
@@ -138,6 +156,9 @@ export type BranchGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 export type BranchGroupByOutputType = {
   id: string
   name: string
+  address: string | null
+  phone: string | null
+  isActive: boolean
   createdAt: Date
   _count: BranchCountAggregateOutputType | null
   _min: BranchMinAggregateOutputType | null
@@ -165,6 +186,9 @@ export type BranchWhereInput = {
   NOT?: Prisma.BranchWhereInput | Prisma.BranchWhereInput[]
   id?: Prisma.StringFilter<"Branch"> | string
   name?: Prisma.StringFilter<"Branch"> | string
+  address?: Prisma.StringNullableFilter<"Branch"> | string | null
+  phone?: Prisma.StringNullableFilter<"Branch"> | string | null
+  isActive?: Prisma.BoolFilter<"Branch"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   staff?: Prisma.UserListRelationFilter
   services?: Prisma.ServiceListRelationFilter
@@ -174,6 +198,9 @@ export type BranchWhereInput = {
 export type BranchOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   staff?: Prisma.UserOrderByRelationAggregateInput
   services?: Prisma.ServiceOrderByRelationAggregateInput
@@ -186,6 +213,9 @@ export type BranchWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BranchWhereInput[]
   NOT?: Prisma.BranchWhereInput | Prisma.BranchWhereInput[]
   name?: Prisma.StringFilter<"Branch"> | string
+  address?: Prisma.StringNullableFilter<"Branch"> | string | null
+  phone?: Prisma.StringNullableFilter<"Branch"> | string | null
+  isActive?: Prisma.BoolFilter<"Branch"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   staff?: Prisma.UserListRelationFilter
   services?: Prisma.ServiceListRelationFilter
@@ -195,6 +225,9 @@ export type BranchWhereUniqueInput = Prisma.AtLeast<{
 export type BranchOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.BranchCountOrderByAggregateInput
   _max?: Prisma.BranchMaxOrderByAggregateInput
@@ -207,12 +240,18 @@ export type BranchScalarWhereWithAggregatesInput = {
   NOT?: Prisma.BranchScalarWhereWithAggregatesInput | Prisma.BranchScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Branch"> | string
   name?: Prisma.StringWithAggregatesFilter<"Branch"> | string
+  address?: Prisma.StringNullableWithAggregatesFilter<"Branch"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Branch"> | string | null
+  isActive?: Prisma.BoolWithAggregatesFilter<"Branch"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Branch"> | Date | string
 }
 
 export type BranchCreateInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserCreateNestedManyWithoutBranchInput
   services?: Prisma.ServiceCreateNestedManyWithoutBranchInput
@@ -222,6 +261,9 @@ export type BranchCreateInput = {
 export type BranchUncheckedCreateInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBranchInput
@@ -231,6 +273,9 @@ export type BranchUncheckedCreateInput = {
 export type BranchUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUpdateManyWithoutBranchNestedInput
   services?: Prisma.ServiceUpdateManyWithoutBranchNestedInput
@@ -240,6 +285,9 @@ export type BranchUpdateInput = {
 export type BranchUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBranchNestedInput
@@ -249,18 +297,27 @@ export type BranchUncheckedUpdateInput = {
 export type BranchCreateManyInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
 }
 
 export type BranchUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type BranchUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -272,18 +329,27 @@ export type BranchNullableScalarRelationFilter = {
 export type BranchCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type BranchMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type BranchMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -339,6 +405,9 @@ export type BranchUpdateOneRequiredWithoutOrdersNestedInput = {
 export type BranchCreateWithoutStaffInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   services?: Prisma.ServiceCreateNestedManyWithoutBranchInput
   orders?: Prisma.OrderCreateNestedManyWithoutBranchInput
@@ -347,6 +416,9 @@ export type BranchCreateWithoutStaffInput = {
 export type BranchUncheckedCreateWithoutStaffInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBranchInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBranchInput
@@ -371,6 +443,9 @@ export type BranchUpdateToOneWithWhereWithoutStaffInput = {
 export type BranchUpdateWithoutStaffInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUpdateManyWithoutBranchNestedInput
   orders?: Prisma.OrderUpdateManyWithoutBranchNestedInput
@@ -379,6 +454,9 @@ export type BranchUpdateWithoutStaffInput = {
 export type BranchUncheckedUpdateWithoutStaffInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBranchNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBranchNestedInput
@@ -387,6 +465,9 @@ export type BranchUncheckedUpdateWithoutStaffInput = {
 export type BranchCreateWithoutServicesInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserCreateNestedManyWithoutBranchInput
   orders?: Prisma.OrderCreateNestedManyWithoutBranchInput
@@ -395,6 +476,9 @@ export type BranchCreateWithoutServicesInput = {
 export type BranchUncheckedCreateWithoutServicesInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBranchInput
@@ -419,6 +503,9 @@ export type BranchUpdateToOneWithWhereWithoutServicesInput = {
 export type BranchUpdateWithoutServicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUpdateManyWithoutBranchNestedInput
   orders?: Prisma.OrderUpdateManyWithoutBranchNestedInput
@@ -427,6 +514,9 @@ export type BranchUpdateWithoutServicesInput = {
 export type BranchUncheckedUpdateWithoutServicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBranchNestedInput
@@ -435,6 +525,9 @@ export type BranchUncheckedUpdateWithoutServicesInput = {
 export type BranchCreateWithoutOrdersInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserCreateNestedManyWithoutBranchInput
   services?: Prisma.ServiceCreateNestedManyWithoutBranchInput
@@ -443,6 +536,9 @@ export type BranchCreateWithoutOrdersInput = {
 export type BranchUncheckedCreateWithoutOrdersInput = {
   id?: string
   name: string
+  address?: string | null
+  phone?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   staff?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
   services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBranchInput
@@ -467,6 +563,9 @@ export type BranchUpdateToOneWithWhereWithoutOrdersInput = {
 export type BranchUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUpdateManyWithoutBranchNestedInput
   services?: Prisma.ServiceUpdateManyWithoutBranchNestedInput
@@ -475,6 +574,9 @@ export type BranchUpdateWithoutOrdersInput = {
 export type BranchUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   staff?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBranchNestedInput
@@ -532,6 +634,9 @@ export type BranchCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.E
 export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  address?: boolean
+  phone?: boolean
+  isActive?: boolean
   createdAt?: boolean
   staff?: boolean | Prisma.Branch$staffArgs<ExtArgs>
   services?: boolean | Prisma.Branch$servicesArgs<ExtArgs>
@@ -542,22 +647,31 @@ export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type BranchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  address?: boolean
+  phone?: boolean
+  isActive?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["branch"]>
 
 export type BranchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  address?: boolean
+  phone?: boolean
+  isActive?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["branch"]>
 
 export type BranchSelectScalar = {
   id?: boolean
   name?: boolean
+  address?: boolean
+  phone?: boolean
+  isActive?: boolean
   createdAt?: boolean
 }
 
-export type BranchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt", ExtArgs["result"]["branch"]>
+export type BranchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "address" | "phone" | "isActive" | "createdAt", ExtArgs["result"]["branch"]>
 export type BranchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   staff?: boolean | Prisma.Branch$staffArgs<ExtArgs>
   services?: boolean | Prisma.Branch$servicesArgs<ExtArgs>
@@ -577,6 +691,9 @@ export type $BranchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    address: string | null
+    phone: string | null
+    isActive: boolean
     createdAt: Date
   }, ExtArgs["result"]["branch"]>
   composites: {}
@@ -1006,6 +1123,9 @@ export interface Prisma__BranchClient<T, Null = never, ExtArgs extends runtime.T
 export interface BranchFieldRefs {
   readonly id: Prisma.FieldRef<"Branch", 'String'>
   readonly name: Prisma.FieldRef<"Branch", 'String'>
+  readonly address: Prisma.FieldRef<"Branch", 'String'>
+  readonly phone: Prisma.FieldRef<"Branch", 'String'>
+  readonly isActive: Prisma.FieldRef<"Branch", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Branch", 'DateTime'>
 }
     

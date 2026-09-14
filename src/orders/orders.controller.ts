@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
 import { seconds, Throttle } from '@nestjs/throttler';
 import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @ApiTags('Orders')
 @ApiBearerAuth()
@@ -36,8 +38,11 @@ export class OrdersController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.orders.findAll(user);
+  findAll(
+    @Query() query: PaginationQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.orders.findAll(user, query);
   }
 
   @Get(':id')

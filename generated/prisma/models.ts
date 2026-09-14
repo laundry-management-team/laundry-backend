@@ -9,7 +9,6 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User.js'
-export type * from './models/Address.js'
 export type * from './models/DeviceToken.js'
 export type * from './models/Branch.js'
 export type * from './models/Service.js'
@@ -17,4 +16,5 @@ export type * from './models/Order.js'
 export type * from './models/OrderItem.js'
 export type * from './models/OrderStatusEvent.js'
 export type * from './models/OrderNumberCounter.js'
+export type * from './models/SmsLog.js'
 export type * from './commonInputTypes.js'

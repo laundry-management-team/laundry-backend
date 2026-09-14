@@ -18,6 +18,11 @@ import { assertValidTransition } from './order-state-machine';
 import { RedisService } from '../redis/redis.service';
 import { ORDER_STATUS_CHANGED_CHANNEL } from './order-events';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import {
+  buildPaginatedResult,
+  getSkipTake,
+} from '../common/helper/pagination.helper';
 
 @Injectable()
 export class OrdersService {
@@ -96,20 +101,24 @@ export class OrdersService {
     return order;
   }
 
-  async findAll(actingUser: AuthenticatedUser) {
-    if (actingUser.role === Role.CUSTOMER) {
-      return this.prisma.order.findMany({
-        where: { customerId: actingUser.userId },
+  async findAll(actingUser: AuthenticatedUser, query: PaginationQueryDto) {
+    const where =
+      actingUser.role === Role.CUSTOMER
+        ? { customerId: actingUser.userId }
+        : actingUser.role === Role.STAFF
+          ? { branchId: actingUser.branchId ?? undefined }
+          : undefined;
+
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
         orderBy: { createdAt: 'desc' },
-      });
-    }
-    if (actingUser.role === Role.STAFF) {
-      return this.prisma.order.findMany({
-        where: { branchId: actingUser.branchId ?? undefined },
-        orderBy: { createdAt: 'desc' },
-      });
-    }
-    return this.prisma.order.findMany({ orderBy: { createdAt: 'desc' } });
+        ...getSkipTake(query),
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+
+    return buildPaginatedResult(items, total, query);
   }
 
   async findOne(id: string, actingUser: AuthenticatedUser) {

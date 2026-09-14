@@ -34,6 +34,15 @@ export const PaymentStatus = {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 
+export const SmsStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED'
+} as const
+
+export type SmsStatus = (typeof SmsStatus)[keyof typeof SmsStatus]
+
+
 export const OrderStatus = {
   WAITING_FOR_STAFF: 'WAITING_FOR_STAFF',
   ORDER_ACCEPTED: 'ORDER_ACCEPTED',

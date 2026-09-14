@@ -12,6 +12,16 @@ import { RESPONSE_MESSAGE_KEY } from './response-message.decorator';
 import { ApiSuccessResponse } from '../interfaces/api-response.interface';
 import { I18nContext } from 'nestjs-i18n';
 import { DateConverter } from '../helper/date-converter.helper';
+import { PaginatedResult } from '../interfaces/paginated-result.interface';
+
+function isPaginatedResult(value: unknown): value is PaginatedResult<unknown> {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    Array.isArray((value as PaginatedResult<unknown>).data) &&
+    typeof (value as PaginatedResult<unknown>).meta === 'object'
+  );
+}
 
 @Injectable()
 export class TransformResponseInterceptor implements NestInterceptor<
@@ -36,10 +46,12 @@ export class TransformResponseInterceptor implements NestInterceptor<
       map((data): ApiSuccessResponse => {
         const res = context.switchToHttp().getResponse<Response>();
         const i18n = I18nContext.current(context);
+        const paginated = isPaginatedResult(data);
         return {
           success: true,
           statusCode: res.statusCode,
-          data: data ?? null,
+          data: paginated ? data.data : (data ?? null),
+          ...(paginated ? { meta: data.meta } : {}),
           message: i18n?.t(messageKey) ?? messageKey,
           timestamp: DateConverter.formatToVientianeString(),
         };

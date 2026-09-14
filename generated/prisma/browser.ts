@@ -23,11 +23,6 @@ export * from './enums.js';
  */
 export type User = Prisma.UserModel
 /**
- * Model Address
- * 
- */
-export type Address = Prisma.AddressModel
-/**
  * Model DeviceToken
  * 
  */
@@ -62,3 +57,8 @@ export type OrderStatusEvent = Prisma.OrderStatusEventModel
  * 
  */
 export type OrderNumberCounter = Prisma.OrderNumberCounterModel
+/**
+ * Model SmsLog
+ * 
+ */
+export type SmsLog = Prisma.SmsLogModel

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   UnauthorizedException,
@@ -40,6 +41,8 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const phone = PhoneNumberValidator.toInternational(dto.phone);
+    const { countryCode } = PhoneNumberValidator.split(phone);
+
     const existing = await this.prisma.user.findUnique({
       where: { phone },
     });
@@ -47,7 +50,7 @@ export class AuthService {
 
     const passwordHash = await argon2.hash(dto.password);
     const user = await this.prisma.user.create({
-      data: { phone, email: dto.email, passwordHash },
+      data: { phone, countryCode, email: dto.email, passwordHash },
     });
 
     return this.issueTokens(user.id, user.role, user.branchId);

@@ -2,6 +2,7 @@ export interface ApiSuccessResponse<T = unknown> {
   success: true;
   statusCode: number;
   data: T;
+  meta?: unknown;
   message: string;
   timestamp: string;
 }

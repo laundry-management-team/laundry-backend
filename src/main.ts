@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { ConsoleLogger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { initSentry } from './observability/sentry';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { INFRA_ROUTE_PREFIXES } from './common/constants/infra-routes.constant';
 
 async function bootstrap() {
   initSentry();
@@ -11,9 +12,18 @@ async function bootstrap() {
     logger: new ConsoleLogger({ json: process.env.NODE_ENV === 'production' }),
   });
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
+  app.setGlobalPrefix('api', {
+    exclude: INFRA_ROUTE_PREFIXES.map((p) => p.replace(/^\//, '')),
+  });
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   app.use(helmet());
+  app.enableShutdownHooks();
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

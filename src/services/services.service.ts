@@ -4,6 +4,8 @@ import { RedisService } from '../redis/redis.service';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
 import { CreateServiceDto } from './dto/create-service.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { buildPaginatedResult } from '../common/helper/pagination.helper';
 
 const CACHE_TTL_SECONDS = 600;
 
@@ -18,15 +20,25 @@ export class ServicesService {
     private readonly cacheMisses: Counter<string>,
   ) {}
 
-  async findByBranch(branchId: string) {
+  async findByBranch(branchId: string, query: PaginationQueryDto) {
     const cacheKey = `branch:${branchId}:services`;
     const cached = await this.redis.get(cacheKey);
+    let services: unknown[];
     if (cached) {
       this.cacheHits.inc({ branch_id: branchId });
-      return JSON.parse(cached) as unknown[];
+      services = JSON.parse(cached) as unknown[];
+    } else {
+      this.cacheMisses.inc({ branch_id: branchId });
+      services = await this.refreshCache(branchId);
     }
-    this.cacheMisses.inc({ branch_id: branchId });
-    return this.refreshCache(branchId);
+
+    const { page, limit } = query;
+    const start = (page - 1) * limit;
+    return buildPaginatedResult(
+      services.slice(start, start + limit),
+      services.length,
+      query,
+    );
   }
 
   async findById(id: string) {

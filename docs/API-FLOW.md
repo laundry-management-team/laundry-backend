@@ -8,15 +8,67 @@ This document describes the real request flow through the laundry backend: who c
 |---|---|---|
 | `CUSTOMER` | End customer, self-registers | Create own orders, view own orders, cancel own orders |
 | `STAFF` | Branch employee, promoted manually (no self-signup) | Accept/progress/cancel orders for their branch, mark payment |
-| `ADMIN` | Shop owner/operator | Everything STAFF can do, across all branches |
+| `ADMIN` | Shop owner/operator | Everything STAFF can do, across all branches, plus create branches/services and send notifications |
 
 Every authenticated request carries a JWT access token with `{ sub: userId, role, branchId }`. `STAFF` is scoped to their own `branchId` — the service layer rejects any STAFF action on an order belonging to a different branch (`ForbiddenException`).
 
 ---
 
+## 0. Response envelope
+
+**Every response is wrapped**, except `/health`, `/metrics`, and `/admin/queues` (see `INFRA_ROUTE_PREFIXES`), via a global `TransformResponseInterceptor` + `HttpExceptionFilter`.
+
+Success:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": { "...": "endpoint-specific payload, or null for 204-style responses" },
+  "message": "Success",
+  "timestamp": "2026-09-14T04:21:34+07:00"
+}
+```
+`message` is an i18n-resolved string — most endpoints get the default `"Success"`, some (see `@ResponseMessage(...)` on `AuthController`) get a specific one, e.g. `"Registration successful"`, `"Login successful"`. `timestamp` is always Vientiane local time (`+07:00`).
+
+List endpoints that support pagination return a `meta` block alongside `data`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "data": [ { "...": "one item" } ],
+  "meta": { "total": 3, "page": 1, "limit": 20, "totalPages": 1 },
+  "message": "Success",
+  "timestamp": "2026-09-14T04:21:34+07:00"
+}
+```
+
+Error:
+```json
+{
+  "success": false,
+  "statusCode": 400,
+  "data": null,
+  "message": "Validation failed",
+  "errors": ["page must not be less than 1", "page must be an integer number"],
+  "timestamp": "2026-09-14T04:21:35+07:00"
+}
+```
+`errors` only appears for validation failures (array of `class-validator` messages); other errors just have `message`.
+
+**Below, `data` (and `meta` where applicable) is shown per endpoint — assume every response is wrapped in the envelope above.**
+
+### Pagination query params
+Any endpoint documented as paginated accepts:
+- `page` — integer, ≥1, default `1`
+- `limit` — integer, 1–100, default `20`
+
+Both are optional; invalid values (non-integer, out of range) return `400`.
+
+---
+
 ## 1. Customer sign-up & login flow
 
-Phone number is the primary identifier (Lao mobile format, validated/normalized by `PhoneNumberValidator` — accepts `020XXXXXXXX`, `+85620XXXXXXXX`, `85620XXXXXXXX`, bare `20XXXXXXXX`, all normalize to the same `+85620XXXXXXXX` in the DB). Email is optional.
+Phone number is the primary identifier (Lao mobile format, validated/normalized by `PhoneNumberValidator` — accepts `020XXXXXXXX`, `+85620XXXXXXXX`, `85620XXXXXXXX`, bare `20XXXXXXXX`, all normalize to the same `+85620XXXXXXXX` in the DB, with `countryCode` (`+856`) stored separately on the user row). Email is optional.
 
 ```
 Customer                          Backend
@@ -48,7 +100,7 @@ Request:
 ```
 `email` is optional — omit it entirely if the customer doesn't have one.
 
-Response `201`:
+Response `201`, `data`:
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
@@ -67,7 +119,7 @@ Request:
 ```json
 { "phone": "+85620998877666", "password": "Passw0rd!" }
 ```
-Response `200`: same shape as register.
+Response `200`, `data`: same shape as register.
 Error `401`: `{ "message": "Invalid credentials" }`
 
 ### `POST /auth/refresh`
@@ -75,23 +127,24 @@ Request:
 ```json
 { "refreshToken": "eyJhbGciOiJIUzI1NiIs..." }
 ```
-Response `200`: new `{ accessToken, refreshToken }` pair. The old refresh token is deleted from Redis (single-use, rotating).
+Response `200`, `data`: new `{ accessToken, refreshToken }` pair. The old refresh token is deleted from Redis (single-use, rotating).
 Error `401`: `{ "message": "Refresh token expired or already used" }` — also fires if a token is replayed (already consumed).
 
 ### `POST /auth/logout`
 Request: `{ "refreshToken": "..." }`
-Response: `204 No Content`. Deletes the session from Redis.
+Response: `204 No Content` (no envelope body). Deletes the session from Redis.
 
 ---
 
 ## 2. OTP login (alternative to password)
 
-Used for passwordless login/verification. Same phone-normalization as above.
+Used for passwordless login/verification. Same phone-normalization as above. SMS is sent via **Telbiz** (`src/sms/telbiz.service.ts`) — OAuth-style client-credentials token cached in Redis, then a send call per OTP.
 
 ```
-Customer                          Backend                    SMS Gateway
+Customer                          Backend                    Telbiz
    │── POST /auth/otp/request ─────▶│                              │
-   │                                │── send code ───────────────▶│ (or dev-log if unset)
+   │                                │── send SMS ─────────────────▶│ (or dev-log if TELBIZ_CLIENT_ID unset)
+   │                                │── log to sms_logs table       │
    │◀── 200 {message} ──────────── │                              │
    │                                │                              │
    │── POST /auth/otp/verify ──────▶│  checks Redis-stored code    │
@@ -102,11 +155,9 @@ Customer                          Backend                    SMS Gateway
 ### `POST /auth/otp/request`
 Rate limit: 3/min per IP.
 Request: `{ "phone": "02099887766" }`
-Response `200` (always, to avoid leaking which numbers are registered):
-```json
-{ "message": "If that phone number is registered, a code has been sent." }
-```
-In dev (no `SMS_GATEWAY_URL` configured), the code is written to the server log instead of actually being sent.
+Response `200`, `data: null` (always succeeds, to avoid leaking which numbers are registered), `message`: `"If that phone number is registered, a code has been sent"`.
+
+In dev (no `TELBIZ_CLIENT_ID`/`TELBIZ_SECRET` configured), the code is written to the server log instead of actually being sent, and no `sms_logs` row is created. In production, every real send attempt (success or failure) is recorded in `sms_logs` with `status: SENT|FAILED` and, on failure, `errorReason`.
 
 ### `POST /auth/otp/verify`
 Rate limit: 5/min per IP.
@@ -114,28 +165,29 @@ Request:
 ```json
 { "phone": "02099887766", "otp": "663940" }
 ```
-Response `200`: `{ accessToken, refreshToken }`
+Response `200`, `data`: `{ accessToken, refreshToken }`
 Error `401`: `{ "message": "Invalid or expired code" }` — also returned after 5 wrong attempts (temporary lock).
 
 ---
 
 ## 3. Browsing branches & services (public, no auth)
 
-Customer picks a branch and sees what services/prices it offers before placing an order.
+Customer picks a branch and sees what services/prices it offers before placing an order. Both list endpoints are paginated (see §0).
 
-### `GET /branches`
-Response `200`:
+### `GET /branches?page=1&limit=20`
+Response `200`, `data`:
 ```json
 [
   { "id": "b1...", "name": "Vientiane Central", "createdAt": "2026-01-01T00:00:00.000Z" }
 ]
 ```
+plus `meta: { total, page, limit, totalPages }`.
 
 ### `GET /branches/:id`
-Response `200`: single branch object (same shape), or `404` if not found.
+Response `200`, `data`: single branch object (same shape), or `404` if not found. Not paginated, no `meta`.
 
-### `GET /branches/:id/services`
-Response `200`:
+### `GET /branches/:id/services?page=1&limit=20`
+Response `200`, `data`:
 ```json
 [
   {
@@ -149,6 +201,20 @@ Response `200`:
   }
 ]
 ```
+plus `meta`. Backed by a Redis cache per branch (10 min TTL) — pagination is applied in-memory over the cached/full list, not pushed down to the DB query.
+
+### `POST /branches` — create a branch
+Auth: `ADMIN` only.
+Request: `{ "name": "Vientiane Central" }`
+Response `201`, `data`: the created branch.
+
+### `POST /branches/:id/services` — add a service to a branch
+Auth: `ADMIN` only.
+Request:
+```json
+{ "name": "Wash & Fold", "unit": "PER_KG", "price": 15000, "estMinutes": 180 }
+```
+Response `201`, `data`: the created service. `unit` is `PER_KG` or `PER_ITEM`.
 
 ---
 
@@ -193,7 +259,7 @@ Request (customer creating their own order):
 ```
 If `STAFF`/`ADMIN` create the order on a walk-in customer's behalf, `customerId` is required in the body instead of being inferred from the token.
 
-Response `201`:
+Response `201`, `data`:
 ```json
 {
   "id": "o1...",
@@ -217,15 +283,16 @@ Response `201`:
 ```
 Errors: `400` if a service doesn't belong to the given branch, or `customerId` missing for a staff-created order.
 
-### `GET /orders` — list orders
-Auth: any role. Scope depends on role — `CUSTOMER` sees only their own orders, `STAFF` sees only their branch's orders, `ADMIN` sees all.
-Response `200`: array of order objects (same shape as above, without `items`).
+### `GET /orders?page=1&limit=20` — list orders
+Auth: any role. Scope depends on role — `CUSTOMER` sees only their own orders, `STAFF` sees only their branch's orders, `ADMIN` sees all. Paginated (see §0).
+Response `200`, `data`: array of order objects (same shape as above, without `items`), plus `meta`.
 
 ### `GET /orders/:id` — order detail
-Response `200`: single order with `items`. `403` if a customer requests someone else's order, or staff request an order from another branch. `404` if not found.
+Response `200`, `data`: single order with `items`. `403` if a customer requests someone else's order, or staff request an order from another branch. `404` if not found.
 
 ### `GET /orders/:id/history` — status audit trail
-Response `200`:
+Not paginated.
+Response `200`, `data`:
 ```json
 [
   { "id": "e1...", "orderId": "o1...", "status": "WAITING_FOR_STAFF", "changedById": "u1...", "note": null, "createdAt": "2026-09-13T10:00:00.000Z" },
@@ -239,18 +306,18 @@ Request:
 ```json
 { "status": "PROCESSING", "note": "started wash cycle" }
 ```
-Response `200`: updated order object. First transition into `ORDER_ACCEPTED` auto-assigns `assignedStaffId` to the acting staff member if not already set.
+Response `200`, `data`: updated order object. First transition into `ORDER_ACCEPTED` auto-assigns `assignedStaffId` to the acting staff member if not already set.
 Errors: `400` illegal transition (e.g. `WAITING_FOR_STAFF → COMPLETED`), `403` wrong branch, `404` not found.
 Side effect: publishes to the `order.status_changed` Redis channel → broadcast over WebSocket to the customer and that branch's staff room; also enqueues a push/SMS notification job.
 
 ### `PATCH /orders/:id/payment` — mark as paid
 Auth: `STAFF` or `ADMIN` only. No request body.
-Response `200`: order with `paymentStatus: "PAID"`, `markedPaidById`, `paidAt` set.
+Response `200`, `data`: order with `paymentStatus: "PAID"`, `markedPaidById`, `paidAt` set.
 Error `400`: `{ "message": "Order is already marked as paid" }`
 
 ### `POST /orders/:id/cancel`
 Auth: any role, but a `CUSTOMER` can only cancel their own order.
-Response `200`: order with `status: "CANCELLED"`. Internally calls the same status-transition logic as `PATCH .../status`, so it's also blocked once the order reaches `PROCESSING`.
+Response `200`, `data`: order with `status: "CANCELLED"`. Internally calls the same status-transition logic as `PATCH .../status`, so it's also blocked once the order reaches `PROCESSING`.
 
 ---
 
@@ -280,22 +347,49 @@ Event received (both rooms get it, whichever applies):
   "branchId": "b1..."
 }
 ```
-No other client → server events are defined; this gateway is broadcast-only from the server.
+No other client → server events are defined; this gateway is broadcast-only from the server. (Not part of the HTTP response envelope — this is a raw socket event payload.)
 
 ---
 
-## 6. Current user / role check
+## 6. Push notifications
+
+Auth required on all routes. Push delivery goes through Firebase Admin SDK (`FirebaseService`), dispatched via the `notifications` BullMQ queue — these endpoints just enqueue the job and return immediately (`data: null`).
+
+### `POST /notifications/device-tokens` — register a device for push
+Auth: any role.
+Request: `{ "token": "fcm-device-token...", "platform": "ANDROID" }` (`platform`: `IOS` or `ANDROID`)
+Response `201`, `data`: the upserted `DeviceToken` row.
+
+### `DELETE /notifications/device-tokens/:token`
+Auth: any role (only removes the caller's own token — `deleteMany({ token, userId })`).
+Response `200`, `data: null`.
+
+### `POST /notifications/send` — push to one user
+Auth: `ADMIN` only.
+Request: `{ "title": "...", "body": "...", "userId": "u1...", "data": { "key": "value" } }` (`token` can be used instead of `userId` to target a specific device)
+Response `201`, `data: null`. Job is enqueued; delivery is async.
+
+### `POST /notifications/broadcast` — push to all users
+Auth: `ADMIN` only.
+Request: `{ "title": "...", "body": "...", "data": { "key": "value" } }`
+Response `201`, `data: null`.
+
+---
+
+## 7. Current user / role check
 
 ### `GET /users/me`
 Auth: any role.
-Response `200`: `{ "userId": "u1...", "role": "CUSTOMER" }` (decoded straight from the JWT, no DB round-trip).
+Response `200`, `data`: `{ "userId": "u1...", "role": "CUSTOMER" }` (decoded straight from the JWT, no DB round-trip).
 
 ### `GET /users/staff-only`
 Auth: `STAFF` or `ADMIN` only. Demonstrates role gating — `403` for `CUSTOMER`.
 
 ---
 
-## 7. Operational endpoints
+## 8. Operational endpoints
+
+These are **not** wrapped in the response envelope (`INFRA_ROUTE_PREFIXES` excludes them).
 
 ### `GET /health`
 No auth. Checks DB (2s timeout), Redis, disk usage.
@@ -319,7 +413,6 @@ Bull Board dashboard for the `notifications` and `cache-warm` BullMQ queues. **N
 
 ## Not yet implemented (known gaps)
 
-- **Forgot/reset password** — no endpoint exists yet. See conversation notes: recommended interim approach is a staff/admin-assisted reset, since no SMS gateway is configured for a self-service flow.
-- **`SMS_GATEWAY_URL` / `PUSH_PROVIDER_URL`** — unset in this environment, so OTP codes and push notifications degrade to dev-log output rather than actually reaching a phone.
+- **Forgot/reset password** — no endpoint exists yet. Recommended interim approach: a staff/admin-assisted reset, since building a fully self-service flow now has SMS available (Telbiz) but no dedicated reset-token endpoint yet.
 - e2e/spec tests — intentionally deferred.
 - `docker-compose.yml` / `Dockerfile`, `.env.example` — not yet created.

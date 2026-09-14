@@ -52,14 +52,14 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Address: 'Address',
   DeviceToken: 'DeviceToken',
   Branch: 'Branch',
   Service: 'Service',
   Order: 'Order',
   OrderItem: 'OrderItem',
   OrderStatusEvent: 'OrderStatusEvent',
-  OrderNumberCounter: 'OrderNumberCounter'
+  OrderNumberCounter: 'OrderNumberCounter',
+  SmsLog: 'SmsLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -81,28 +81,19 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   phone: 'phone',
+  countryCode: 'countryCode',
   email: 'email',
+  name: 'name',
+  avatarUrl: 'avatarUrl',
   passwordHash: 'passwordHash',
   role: 'role',
   branchId: 'branchId',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
-export const AddressScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  label: 'label',
-  line1: 'line1',
-  lat: 'lat',
-  lng: 'lng',
-  createdAt: 'createdAt'
-} as const
-
-export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
 
 
 export const DeviceTokenScalarFieldEnum = {
@@ -119,6 +110,9 @@ export type DeviceTokenScalarFieldEnum = (typeof DeviceTokenScalarFieldEnum)[key
 export const BranchScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  address: 'address',
+  phone: 'phone',
+  isActive: 'isActive',
   createdAt: 'createdAt'
 } as const
 
@@ -187,6 +181,21 @@ export const OrderNumberCounterScalarFieldEnum = {
 } as const
 
 export type OrderNumberCounterScalarFieldEnum = (typeof OrderNumberCounterScalarFieldEnum)[keyof typeof OrderNumberCounterScalarFieldEnum]
+
+
+export const SmsLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  countryCode: 'countryCode',
+  phone: 'phone',
+  message: 'message',
+  status: 'status',
+  provider: 'provider',
+  errorReason: 'errorReason',
+  createdAt: 'createdAt'
+} as const
+
+export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
 
 
 export const SortOrder = {

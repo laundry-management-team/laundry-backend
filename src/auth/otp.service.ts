@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RedisService } from '../redis/redis.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { PhoneNumberValidator } from '../common/helper/phone-validator.helper';
+import { SmsStatus } from '../../generated/prisma/enums';
+import { TelbizService } from '../sms/telbiz.service';
 
 const OTP_TTL_SECONDS = 5 * 60;
 const OTP_COOLDOWN_SECONDS = 60;
@@ -12,7 +16,11 @@ const OTP_FAIL_LOCK_SECONDS = 15 * 60;
 export class OtpService {
   private readonly logger = new Logger(OtpService.name);
 
-  constructor(private readonly redis: RedisService) {}
+  constructor(
+    private readonly redis: RedisService,
+    private readonly prisma: PrismaService,
+    private readonly telbiz: TelbizService,
+  ) {}
 
   async generateAndSend(
     phone: string,
@@ -119,28 +127,42 @@ export class OtpService {
   }
 
   private async dispatch(phone: string, otp: string): Promise<void> {
-    const gatewayUrl = process.env.SMS_GATEWAY_URL;
     const message = `Your verification code is ${otp}. It expires in 5 minutes.`;
+    const { countryCode, localNumber } = PhoneNumberValidator.split(phone);
 
-    if (!gatewayUrl) {
+    if (!process.env.TELBIZ_CLIENT_ID) {
       this.logger.warn(
-        `SMS_GATEWAY_URL not set — OTP for ${phone}: ${otp} [DEV ONLY]`,
+        `TELBIZ_CLIENT_ID not set — OTP for ${phone}: ${otp} [DEV ONLY]`,
       );
       return;
     }
 
     try {
-      const response = await fetch(gatewayUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: phone, message }),
-      });
-      if (!response.ok) {
-        throw new Error(`SMS gateway responded with ${response.status}`);
-      }
+      await this.telbiz.sendSms(localNumber, message, 'OTP');
       this.logger.log(`OTP SMS sent to ${phone}`);
+
+      await this.prisma.smsLog.create({
+        data: {
+          countryCode,
+          phone,
+          message,
+          status: SmsStatus.SENT,
+          provider: 'telbiz',
+        },
+      });
     } catch (err) {
       this.logger.error(`Failed to send OTP SMS to ${phone}`, err as Error);
+
+      await this.prisma.smsLog.create({
+        data: {
+          countryCode,
+          phone,
+          message,
+          status: SmsStatus.FAILED,
+          provider: 'telbiz',
+          errorReason: (err as Error).message,
+        },
+      });
     }
   }
 }

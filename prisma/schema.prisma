@@ -29,40 +29,36 @@ enum PaymentStatus {
   PAID
 }
 
+enum SmsStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 model User {
   id           String   @id @default(uuid())
   phone        String   @unique
+  countryCode  String   @map("country_code")
   email        String?  @unique
+  name         String?
+  avatarUrl    String?  @map("avatar_url")
   passwordHash String   @map("password_hash")
   role         Role     @default(CUSTOMER)
   branchId     String?  @map("branch_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   branch Branch? @relation(fields: [branchId], references: [id])
 
-  addresses        Address[]
   deviceTokens     DeviceToken[]
   ordersAsCustomer Order[]            @relation("CustomerOrders")
   ordersAsStaff    Order[]            @relation("StaffOrders")
   ordersMarkedPaid Order[]            @relation("OrderMarkedPaidBy")
   statusEventsMade OrderStatusEvent[]
+  smsLogs          SmsLog[]
 
   @@map("users")
-}
-
-model Address {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label     String
-  line1     String
-  lat       Decimal? @db.Decimal(9, 6)
-  lng       Decimal? @db.Decimal(9, 6)
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@index([userId])
-  @@map("addresses")
 }
 
 model DeviceToken {
@@ -71,7 +67,7 @@ model DeviceToken {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String         @unique
   platform  DevicePlatform
-  createdAt DateTime       @default(now()) @map("created_at")
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
 
   @@index([userId])
   @@map("device_tokens")
@@ -94,7 +90,10 @@ enum ServiceUnit {
 model Branch {
   id        String   @id @default(uuid())
   name      String
-  createdAt DateTime @default(now()) @map("created_at")
+  address   String?
+  phone     String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   staff    User[]
   services Service[]
@@ -111,7 +110,7 @@ model Service {
   unit       ServiceUnit
   price      Decimal     @db.Decimal(10, 2)
   estMinutes Int         @map("est_minutes")
-  createdAt  DateTime    @default(now()) @map("created_at")
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
 
   orderItems OrderItem[]
 
@@ -136,8 +135,8 @@ model Order {
   markedPaidById  String?       @map("marked_paid_by_id")
   markedPaidBy    User?         @relation("OrderMarkedPaidBy", fields: [markedPaidById], references: [id])
   paidAt          DateTime?     @map("paid_at")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   items        OrderItem[]
   statusEvents OrderStatusEvent[]
@@ -167,7 +166,7 @@ model OrderStatusEvent {
   changedById String      @map("changed_by_id")
   changedBy   User        @relation(fields: [changedById], references: [id])
   note        String?
-  createdAt   DateTime    @default(now()) @map("created_at")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
 
   @@index([orderId, createdAt])
   @@map("order_status_events")
@@ -178,4 +177,21 @@ model OrderNumberCounter {
   current BigInt @default(0)
 
   @@map("order_number_counters")
+}
+
+model SmsLog {
+  id          String    @id @default(uuid())
+  userId      String?   @map("user_id")
+  user        User?     @relation(fields: [userId], references: [id])
+  countryCode String    @map("country_code")
+  phone       String
+  message     String
+  status      SmsStatus @default(PENDING)
+  provider    String?
+  errorReason String?   @map("error_reason")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([phone, createdAt])
+  @@map("sms_logs")
 }

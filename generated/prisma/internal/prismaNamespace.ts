@@ -398,14 +398,14 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Address: 'Address',
   DeviceToken: 'DeviceToken',
   Branch: 'Branch',
   Service: 'Service',
   Order: 'Order',
   OrderItem: 'OrderItem',
   OrderStatusEvent: 'OrderStatusEvent',
-  OrderNumberCounter: 'OrderNumberCounter'
+  OrderNumberCounter: 'OrderNumberCounter',
+  SmsLog: 'SmsLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "address" | "deviceToken" | "branch" | "service" | "order" | "orderItem" | "orderStatusEvent" | "orderNumberCounter"
+    modelProps: "user" | "deviceToken" | "branch" | "service" | "order" | "orderItem" | "orderStatusEvent" | "orderNumberCounter" | "smsLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -496,80 +496,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
-        }
-      }
-    }
-    Address: {
-      payload: Prisma.$AddressPayload<ExtArgs>
-      fields: Prisma.AddressFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.AddressFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.AddressFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        findFirst: {
-          args: Prisma.AddressFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.AddressFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        findMany: {
-          args: Prisma.AddressFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>[]
-        }
-        create: {
-          args: Prisma.AddressCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        createMany: {
-          args: Prisma.AddressCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.AddressCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>[]
-        }
-        delete: {
-          args: Prisma.AddressDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        update: {
-          args: Prisma.AddressUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        deleteMany: {
-          args: Prisma.AddressDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.AddressUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.AddressUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>[]
-        }
-        upsert: {
-          args: Prisma.AddressUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddressPayload>
-        }
-        aggregate: {
-          args: Prisma.AddressAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAddress>
-        }
-        groupBy: {
-          args: Prisma.AddressGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AddressGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.AddressCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AddressCountAggregateOutputType> | number
         }
       }
     }
@@ -1091,6 +1017,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SmsLog: {
+      payload: Prisma.$SmsLogPayload<ExtArgs>
+      fields: Prisma.SmsLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SmsLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SmsLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SmsLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SmsLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        findMany: {
+          args: Prisma.SmsLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        create: {
+          args: Prisma.SmsLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        createMany: {
+          args: Prisma.SmsLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SmsLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        delete: {
+          args: Prisma.SmsLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        update: {
+          args: Prisma.SmsLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SmsLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SmsLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SmsLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.SmsLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SmsLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSmsLog>
+        }
+        groupBy: {
+          args: Prisma.SmsLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SmsLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1133,28 +1133,19 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   phone: 'phone',
+  countryCode: 'countryCode',
   email: 'email',
+  name: 'name',
+  avatarUrl: 'avatarUrl',
   passwordHash: 'passwordHash',
   role: 'role',
   branchId: 'branchId',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
-export const AddressScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  label: 'label',
-  line1: 'line1',
-  lat: 'lat',
-  lng: 'lng',
-  createdAt: 'createdAt'
-} as const
-
-export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
 
 
 export const DeviceTokenScalarFieldEnum = {
@@ -1171,6 +1162,9 @@ export type DeviceTokenScalarFieldEnum = (typeof DeviceTokenScalarFieldEnum)[key
 export const BranchScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  address: 'address',
+  phone: 'phone',
+  isActive: 'isActive',
   createdAt: 'createdAt'
 } as const
 
@@ -1241,6 +1235,21 @@ export const OrderNumberCounterScalarFieldEnum = {
 export type OrderNumberCounterScalarFieldEnum = (typeof OrderNumberCounterScalarFieldEnum)[keyof typeof OrderNumberCounterScalarFieldEnum]
 
 
+export const SmsLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  countryCode: 'countryCode',
+  phone: 'phone',
+  message: 'message',
+  status: 'status',
+  provider: 'provider',
+  errorReason: 'errorReason',
+  createdAt: 'createdAt'
+} as const
+
+export type SmsLogScalarFieldEnum = (typeof SmsLogScalarFieldEnum)[keyof typeof SmsLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1300,6 +1309,13 @@ export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -1310,20 +1326,6 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -1352,6 +1354,20 @@ export type EnumServiceUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'ServiceUnit[]'
  */
 export type ListEnumServiceUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceUnit[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -1408,6 +1424,20 @@ export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'BigInt[]'
  */
 export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SmsStatus'
+ */
+export type EnumSmsStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SmsStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SmsStatus[]'
+ */
+export type ListEnumSmsStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SmsStatus[]'>
     
 
 
@@ -1576,7 +1606,6 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
-  address?: Prisma.AddressOmit
   deviceToken?: Prisma.DeviceTokenOmit
   branch?: Prisma.BranchOmit
   service?: Prisma.ServiceOmit
@@ -1584,6 +1613,7 @@ export type GlobalOmitConfig = {
   orderItem?: Prisma.OrderItemOmit
   orderStatusEvent?: Prisma.OrderStatusEventOmit
   orderNumberCounter?: Prisma.OrderNumberCounterOmit
+  smsLog?: Prisma.SmsLogOmit
 }
 
 /* Types for Logging */

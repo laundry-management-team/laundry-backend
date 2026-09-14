@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import {
   DiskHealthIndicator,
   HealthCheck,
@@ -10,7 +10,7 @@ import { RedisHealthIndicator } from './redis.health';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Health')
-@Controller('health')
+@Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
